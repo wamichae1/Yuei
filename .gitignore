@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# graphify
+/graphify-out/
+.graphify_analysis.json
+
+# local development / tooling
+.codex/
+AGENTS.md
+verify.ts
+verify_slider.py
+CLAUDE.md
