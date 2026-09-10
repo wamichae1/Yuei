@@ -60,14 +60,18 @@ export default function HomePage() {
 
       <header className="relative z-10 border-b-2 border-black bg-[var(--paper)]">
         <div className="mx-auto grid h-20 w-full max-w-[1200px] grid-cols-[1fr_auto] items-center px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
-          <div className="inline-flex w-fit items-center gap-3 lg:col-span-4">
+          <Link
+            href="/"
+            aria-label="Yuei.AI training home"
+            className="inline-flex w-fit items-center gap-3 lg:col-span-4"
+          >
             <span className="grid h-10 w-10 place-items-center rounded-[6px] border-2 border-black bg-[var(--green)]">
               <AudioLines size={19} strokeWidth={2.25} />
             </span>
             <span className="text-xl font-bold tracking-[-0.055em]">
               Yuei<span className="text-[var(--green)]">.</span>
             </span>
-          </div>
+          </Link>
 
           <div className="flex items-center justify-end gap-3 lg:col-span-8 lg:grid lg:grid-cols-8">
             <span className="technical-label hidden text-[var(--slate)] sm:inline lg:col-span-5 lg:border-l lg:border-[var(--gridline)] lg:pl-5">

@@ -7,6 +7,7 @@ import {
   useRef,
   useState,
 } from "react";
+import Link from "next/link";
 import { AudioLines } from "lucide-react";
 
 import {
@@ -257,11 +258,10 @@ export function IntervalTrainer() {
 
       <header className="relative z-10 border-b-2 border-black bg-[var(--paper)]">
         <nav className="mx-auto grid h-20 w-full max-w-[1200px] grid-cols-[1fr_auto] items-center px-4 sm:px-6 lg:grid-cols-12 lg:px-8">
-          <button
-            type="button"
-            onClick={handleSetup}
+          <Link
+            href="/"
             className="group inline-flex w-fit items-center gap-3 lg:col-span-4"
-            aria-label="Return to interval training setup"
+            aria-label="Return to Yuei.AI training home"
           >
             <span className="grid h-10 w-10 place-items-center rounded-[6px] border-2 border-black bg-[var(--green)] transition-transform duration-200 group-hover:-translate-y-0.5 group-active:translate-y-0">
               <AudioLines size={19} strokeWidth={2.25} />
@@ -269,7 +269,7 @@ export function IntervalTrainer() {
             <span className="text-xl font-bold tracking-[-0.055em]">
               Yuei<span className="text-[var(--green)]">.</span>
             </span>
-          </button>
+          </Link>
 
           <div className="flex items-center justify-end gap-3 lg:col-span-8 lg:grid lg:grid-cols-8">
             <span className="technical-label hidden text-[var(--slate)] sm:inline lg:col-span-5 lg:border-l lg:border-[var(--gridline)] lg:pl-5">
