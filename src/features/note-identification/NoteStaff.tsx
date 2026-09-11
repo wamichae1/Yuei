@@ -49,6 +49,7 @@ export function NoteStaff({ exercise }: NoteStaffProps) {
         clef: exercise.clef,
         keys: [exercise.pitch.vexKey],
         duration: "q",
+        alignCenter: true,
       });
       if (exercise.pitch.accidental) {
         note.addModifier(new Accidental(exercise.pitch.accidental), 0);
@@ -63,7 +64,7 @@ export function NoteStaff({ exercise }: NoteStaffProps) {
       voice.addTickable(note);
       new Formatter()
         .joinVoices([voice])
-        .format([voice], Math.max(100, width - 190));
+        .formatToStave([voice], stave);
       voice.draw(context, stave);
 
       const svg = container.querySelector("svg");

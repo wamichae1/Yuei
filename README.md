@@ -10,7 +10,9 @@ VexFlow handles musical notation, Tone.js handles audio, and reusable React comp
 
 Note Identification tries to replicate "Music Tutor", a popular app with similar functionality, where there is configurable clef, range, accidentals and more.
 
-The interface was built responsively with keyboard and touch support, with type checking, testing, and production builds used throughout development.
+The interface was built responsively with keyboard and touch support, with type checking, testing, and production builds used throughout development. 
+
+Future plans include adding accounts and a better mobile experience.
 
 
 ## Training Modules
