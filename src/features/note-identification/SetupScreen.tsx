@@ -28,6 +28,8 @@ import type { NoteIdentificationConfig } from "./types";
 
 interface SetupScreenProps {
   config: NoteIdentificationConfig;
+  isAudioLoading: boolean;
+  audioError: string | null;
   onChange: (config: NoteIdentificationConfig) => void;
   onStart: () => void;
 }
@@ -54,6 +56,8 @@ const ACCIDENTAL_OPTIONS: readonly {
 
 export function SetupScreen({
   config,
+  isAudioLoading,
+  audioError,
   onChange,
   onStart,
 }: SetupScreenProps) {
@@ -358,7 +362,8 @@ export function SetupScreen({
           <button
             type="button"
             onClick={onStart}
-            className="mt-6 flex min-h-14 w-full items-center justify-between rounded-[6px] border-2 border-black bg-[var(--green)] px-5 font-semibold transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--yellow)] active:translate-y-0"
+            disabled={isAudioLoading}
+            className="mt-6 flex min-h-14 w-full items-center justify-between rounded-[6px] border-2 border-black bg-[var(--green)] px-5 font-semibold transition duration-200 hover:-translate-y-0.5 hover:bg-[var(--yellow)] active:translate-y-0 disabled:cursor-wait disabled:translate-y-0 disabled:opacity-55"
           >
             <span className="inline-flex items-center gap-2">
               {config.soundEnabled ? (
@@ -366,12 +371,20 @@ export function SetupScreen({
               ) : (
                 <Piano size={18} />
               )}
-              Start reading
+              {isAudioLoading ? "Loading piano…" : "Start reading"}
             </span>
             <span className="grid h-8 w-8 place-items-center rounded-[4px] bg-black text-white">
               <ArrowRight size={17} />
             </span>
           </button>
+          {audioError && config.soundEnabled && (
+            <p
+              role="alert"
+              className="mt-3 border border-[var(--orange)] bg-[var(--orange-soft)] px-3 py-2 text-sm font-medium"
+            >
+              {audioError}
+            </p>
+          )}
         </div>
       </LiquidCard>
     </main>

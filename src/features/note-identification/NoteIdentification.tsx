@@ -12,6 +12,7 @@ import { Piano } from "lucide-react";
 
 import {
   playMusicPitch,
+  preloadMusicAudio,
   stopMusicPlayback,
   unlockMusicAudio,
 } from "@/features/music/audio";
@@ -49,6 +50,9 @@ export function NoteIdentification() {
   const [config, setConfig] =
     useState<NoteIdentificationConfig>(DEFAULT_CONFIG);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [isAudioLoading, setIsAudioLoading] = useState(
+    DEFAULT_CONFIG.soundEnabled,
+  );
   const [audioError, setAudioError] = useState<string | null>(null);
   const playbackToken = useRef(0);
   const playingRef = useRef(false);
@@ -134,27 +138,34 @@ export function NoteIdentification() {
     void stopMusicPlayback();
   }, []);
 
-  const prepareAudio = useCallback(async () => {
+  const prepareAudio = useCallback(async (): Promise<boolean> => {
     setAudioError(null);
-    if (!config.soundEnabled) return;
+    if (!config.soundEnabled) return true;
 
+    setIsAudioLoading(true);
     try {
       await unlockMusicAudio();
+      return true;
     } catch {
       setAudioError(
-        "Audio could not initialize automatically. Press Replay to try again.",
+        "The piano samples could not load. Try again or turn Sound off.",
       );
+      return false;
+    } finally {
+      setIsAudioLoading(false);
     }
   }, [config.soundEnabled]);
 
   const handleStart = useCallback(async () => {
-    await prepareAudio();
-    startSession();
+    if (await prepareAudio()) {
+      startSession();
+    }
   }, [prepareAudio, startSession]);
 
   const handleRestart = useCallback(async () => {
-    await prepareAudio();
-    startSession();
+    if (await prepareAudio()) {
+      startSession();
+    }
   }, [prepareAudio, startSession]);
 
   const handleSetup = useCallback(() => {
@@ -167,10 +178,45 @@ export function NoteIdentification() {
     endSession();
   }, [endSession, silenceAudio]);
 
+  const handleConfigChange = useCallback(
+    (nextConfig: NoteIdentificationConfig) => {
+      if (nextConfig.soundEnabled !== config.soundEnabled) {
+        setIsAudioLoading(nextConfig.soundEnabled);
+        setAudioError(null);
+      }
+      setConfig(nextConfig);
+    },
+    [config.soundEnabled],
+  );
+
   useEffect(() => {
     if (state.phase !== "training" || !state.currentExercise) return;
     void playTarget(state.currentExercise);
   }, [playTarget, state.currentExercise, state.phase]);
+
+  useEffect(() => {
+    if (!config.soundEnabled) return;
+
+    let active = true;
+    void preloadMusicAudio()
+      .then(() => {
+        if (active) {
+          setIsAudioLoading(false);
+        }
+      })
+      .catch(() => {
+        if (active) {
+          setIsAudioLoading(false);
+          setAudioError(
+            "The piano samples could not load. Try again or turn Sound off.",
+          );
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, [config.soundEnabled]);
 
   useEffect(() => {
     if (state.phase === "training") return;
@@ -178,6 +224,15 @@ export function NoteIdentification() {
     playingRef.current = false;
     void stopMusicPlayback();
   }, [state.phase]);
+
+  useEffect(
+    () => () => {
+      playbackToken.current += 1;
+      playingRef.current = false;
+      void stopMusicPlayback();
+    },
+    [],
+  );
 
   const elapsedMs = getElapsedMs(
     state.startedAtMs,
@@ -229,7 +284,9 @@ export function NoteIdentification() {
         {state.phase === "setup" && (
           <SetupScreen
             config={config}
-            onChange={setConfig}
+            isAudioLoading={config.soundEnabled && isAudioLoading}
+            audioError={audioError}
+            onChange={handleConfigChange}
             onStart={() => void handleStart()}
           />
         )}
