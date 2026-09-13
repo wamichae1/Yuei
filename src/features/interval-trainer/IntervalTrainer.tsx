@@ -20,12 +20,13 @@ import {
 import { useTrainingSession } from "@/features/training/useTrainingSession";
 
 import {
-  playExercise,
-  stopPlayback,
-  unlockAudio,
-} from "./audio";
+  playMusicEvents,
+  stopMusicPlayback,
+  unlockMusicAudio,
+} from "@/features/music/audio";
 import { ResultsScreen } from "./ResultsScreen";
 import { SetupScreen } from "./SetupScreen";
+import { getIntervalPlaybackPlan } from "./playback";
 import {
   createIntervalExercise,
   resolveIntervalConfig,
@@ -100,7 +101,11 @@ export function IntervalTrainer() {
     setAudioError(null);
 
     try {
-      const durationMs = await playExercise(exercise);
+      const playbackPlan = getIntervalPlaybackPlan(exercise);
+      const durationMs = await playMusicEvents(
+        playbackPlan.events,
+        playbackPlan.options,
+      );
       window.setTimeout(() => {
         if (playbackToken.current !== token) return;
         playingRef.current = false;
@@ -121,13 +126,13 @@ export function IntervalTrainer() {
     playbackToken.current += 1;
     playingRef.current = false;
     setIsPlaying(false);
-    void stopPlayback();
+    void stopMusicPlayback();
   }, []);
 
   const handleStart = useCallback(async () => {
     setAudioError(null);
     try {
-      await unlockAudio();
+      await unlockMusicAudio();
     } catch {
       setAudioError(
         "Audio could not initialize automatically. Press Replay to try again.",
@@ -139,7 +144,7 @@ export function IntervalTrainer() {
   const handleRestart = useCallback(async () => {
     setAudioError(null);
     try {
-      await unlockAudio();
+      await unlockMusicAudio();
     } catch {
       setAudioError(
         "Audio could not initialize automatically. Press Replay to try again.",
@@ -167,8 +172,17 @@ export function IntervalTrainer() {
     if (state.phase === "training") return;
     playbackToken.current += 1;
     playingRef.current = false;
-    void stopPlayback();
+    void stopMusicPlayback();
   }, [state.phase]);
+
+  useEffect(
+    () => () => {
+      playbackToken.current += 1;
+      playingRef.current = false;
+      void stopMusicPlayback();
+    },
+    [],
+  );
 
   const currentExercise = state.currentExercise;
   const options = resolvedConfig.intervals;

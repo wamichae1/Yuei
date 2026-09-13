@@ -3,11 +3,23 @@ import {
   PRESENTATION_LABELS,
 } from "./theory.ts";
 import type { IntervalExercise, MusicalNote } from "./types.ts";
+import type {
+  MusicPlaybackEvent,
+  MusicPlaybackOptions,
+} from "../music/audio.ts";
 
 export interface IntervalPlaybackEvent {
   kind: "melodic" | "harmonic";
   notes: readonly MusicalNote[];
 }
+
+export interface IntervalPlaybackPlan {
+  events: readonly MusicPlaybackEvent[];
+  options: MusicPlaybackOptions;
+}
+
+const PLAYBACK_START_SECONDS = 0.03;
+const EVENT_GAP_SECONDS = 0.17;
 
 function melodicEvent(note: MusicalNote): IntervalPlaybackEvent {
   return { kind: "melodic", notes: [note] };
@@ -44,6 +56,23 @@ export function getIntervalPlaybackEvents(
         ? [harmonicEvent(exercise)]
         : exercise.notes.map(melodicEvent);
   }
+}
+
+export function getIntervalPlaybackPlan(
+  exercise: IntervalExercise,
+): IntervalPlaybackPlan {
+  return {
+    events: getIntervalPlaybackEvents(exercise).map((event, index) => ({
+      pitches: event.notes,
+      durationSeconds:
+        event.kind === "harmonic" ? 0.85 : index === 0 ? 0.42 : 0.5,
+    })),
+    options: {
+      startDelaySeconds: PLAYBACK_START_SECONDS,
+      gapBetweenEventsSeconds: EVENT_GAP_SECONDS,
+      completionPaddingSeconds: EVENT_GAP_SECONDS,
+    },
+  };
 }
 
 export function formatIntervalPlayback(

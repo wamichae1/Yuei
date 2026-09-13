@@ -25,14 +25,71 @@ export const PIANO_SAMPLE_URLS = {
 } as const;
 
 export const PIANO_SAMPLE_DIRECTORY = "audio/piano/salamander";
+export const MAX_PIANO_SAMPLE_DISTANCE_SEMITONES = 1;
+
+const NATURAL_PITCH_CLASSES = {
+  C: 0,
+  D: 2,
+  E: 4,
+  F: 5,
+  G: 7,
+  A: 9,
+  B: 11,
+} as const;
+
+export function getPianoSampleMidi(note: string): number {
+  const match = /^([A-G])(#?)(\d)$/.exec(note);
+  if (!match) {
+    throw new Error(`Invalid piano sample note: ${note}`);
+  }
+
+  const [, letter, accidental, octave] = match;
+  return (
+    (Number(octave) + 1) * 12 +
+    NATURAL_PITCH_CLASSES[letter as keyof typeof NATURAL_PITCH_CLASSES] +
+    (accidental === "#" ? 1 : 0)
+  );
+}
+
+const PIANO_SAMPLE_MIDIS = Object.keys(PIANO_SAMPLE_URLS).map(
+  getPianoSampleMidi,
+);
+
+export function getClosestPianoSampleDistance(midi: number): number {
+  return Math.min(
+    ...PIANO_SAMPLE_MIDIS.map((sampleMidi) =>
+      Math.abs(sampleMidi - midi),
+    ),
+  );
+}
+
+export function isPianoMidiCovered(midi: number): boolean {
+  return (
+    getClosestPianoSampleDistance(midi) <=
+    MAX_PIANO_SAMPLE_DISTANCE_SEMITONES
+  );
+}
+
+export function buildPianoSampleBaseUrl(
+  origin: string,
+  basePath: string,
+): string {
+  const normalizedBasePath =
+    basePath === "/" ? "" : `/${basePath.replace(/^\/|\/$/g, "")}`;
+
+  return new URL(
+    `${normalizedBasePath}/${PIANO_SAMPLE_DIRECTORY}/`,
+    origin,
+  ).toString();
+}
 
 export function getPianoSampleBaseUrl(): string {
   if (typeof window === "undefined") {
     throw new Error("Piano sample URLs are only available in the browser.");
   }
 
-  return new URL(
-    `../${PIANO_SAMPLE_DIRECTORY}/`,
-    window.location.href,
-  ).toString();
+  return buildPianoSampleBaseUrl(
+    window.location.origin,
+    process.env.NEXT_PUBLIC_BASE_PATH ?? "",
+  );
 }

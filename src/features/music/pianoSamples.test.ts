@@ -3,25 +3,22 @@ import { existsSync } from "node:fs";
 import path from "node:path";
 import test from "node:test";
 
-import { naturalMidi } from "./noteGenerator.ts";
 import {
+  CLEF_SUPPORTED_RANGES,
+  createMusicPitch,
+  getNoteCandidates,
+  naturalMidi,
+} from "./noteGenerator.ts";
+import {
+  buildPianoSampleBaseUrl,
+  getClosestPianoSampleDistance,
+  getPianoSampleMidi,
+  isPianoMidiCovered,
+  MAX_PIANO_SAMPLE_DISTANCE_SEMITONES,
   PIANO_SAMPLE_DIRECTORY,
   PIANO_SAMPLE_URLS,
 } from "./pianoSamples.ts";
-import type { NoteLetter } from "./types.ts";
-
-function sampleMidi(note: string): number {
-  const match = /^([A-G])(#?)(\d)$/.exec(note);
-  assert.ok(match, `Invalid sample note: ${note}`);
-
-  const [, letter, accidental, octave] = match;
-  return (
-    naturalMidi({
-      letter: letter as NoteLetter,
-      octave: Number(octave),
-    }) + (accidental === "#" ? 1 : 0)
-  );
-}
+import type { AccidentalMode, MusicClef } from "./types.ts";
 
 test("the bundled piano manifest contains the compact 23-sample set", () => {
   assert.equal(Object.keys(PIANO_SAMPLE_URLS).length, 23);
@@ -41,8 +38,7 @@ test("the bundled piano manifest contains the compact 23-sample set", () => {
   }
 });
 
-test("every playable Note Identification pitch is near a recorded sample", () => {
-  const sampleMidis = Object.keys(PIANO_SAMPLE_URLS).map(sampleMidi);
+test("every supported Yuei piano pitch is near a recorded sample", () => {
   const lowestPlayableMidi = naturalMidi({ letter: "E", octave: 1 });
   const highestPlayableMidi = naturalMidi({ letter: "A", octave: 6 });
 
@@ -51,12 +47,70 @@ test("every playable Note Identification pitch is near a recorded sample", () =>
     midi <= highestPlayableMidi;
     midi += 1
   ) {
-    const closestDistance = Math.min(
-      ...sampleMidis.map((sample) => Math.abs(sample - midi)),
-    );
     assert.ok(
-      closestDistance <= 1,
-      `MIDI ${midi} is ${closestDistance} semitones from a sample`,
+      isPianoMidiCovered(midi),
+      `MIDI ${midi} is ${getClosestPianoSampleDistance(midi)} semitones from a sample`,
     );
   }
+});
+
+test("sample coverage includes boundaries, sharps, and flats", () => {
+  const e1 = createMusicPitch("E", 1, "");
+  const a6 = createMusicPitch("A", 6, "");
+  const cSharp4 = createMusicPitch("C", 4, "#");
+  const dFlat4 = createMusicPitch("D", 4, "b");
+
+  assert.equal(getPianoSampleMidi("D#1"), 27);
+  assert.equal(getPianoSampleMidi("A6"), 93);
+  assert.equal(
+    getClosestPianoSampleDistance(e1.midi),
+    MAX_PIANO_SAMPLE_DISTANCE_SEMITONES,
+  );
+  assert.equal(getClosestPianoSampleDistance(a6.midi), 0);
+  assert.equal(cSharp4.midi, dFlat4.midi);
+  assert.ok(isPianoMidiCovered(cSharp4.midi));
+  assert.ok(isPianoMidiCovered(dFlat4.midi));
+});
+
+test("every generated full-range note is covered by the piano samples", () => {
+  const clefs: readonly MusicClef[] = ["treble", "bass"];
+  const modes: readonly AccidentalMode[] = [
+    "naturals",
+    "sharps",
+    "flats",
+    "sharps-and-flats",
+  ];
+
+  for (const clef of clefs) {
+    for (const accidentalMode of modes) {
+      const candidates = getNoteCandidates({
+        clef,
+        range: CLEF_SUPPORTED_RANGES[clef],
+        accidentalMode,
+      });
+
+      assert.ok(candidates.length > 0);
+      assert.ok(
+        candidates.every((pitch) => isPianoMidiCovered(pitch.midi)),
+        `${clef}/${accidentalMode} generated an uncovered pitch`,
+      );
+    }
+  }
+});
+
+test("piano sample URLs include the static GitHub Pages base path", () => {
+  const expected =
+    "https://example.test/Yuei/audio/piano/salamander/";
+
+  assert.equal(
+    buildPianoSampleBaseUrl("https://example.test", "/Yuei"),
+    expected,
+  );
+  assert.equal(
+    buildPianoSampleBaseUrl(
+      "https://example.test/Yuei/playbacks/10/",
+      "/Yuei/",
+    ),
+    expected,
+  );
 });

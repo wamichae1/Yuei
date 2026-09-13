@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
+import { getMusicPlaybackDurationMs } from "../music/audio.ts";
 import { buildIntervalBreakdown } from "./results.ts";
 import {
   createIntervalExercise,
@@ -14,6 +15,7 @@ import {
   formatIntervalPlayback,
   getIntervalPlaybackEvents,
   getIntervalPlaybackLabel,
+  getIntervalPlaybackPlan,
 } from "./playback.ts";
 import type {
   IntervalId,
@@ -366,5 +368,60 @@ test("playback is deterministic for a generated exercise", () => {
   assert.deepEqual(
     getIntervalPlaybackEvents(exercise),
     getIntervalPlaybackEvents(exercise),
+  );
+});
+
+test("interval playback plans preserve note durations, gaps, and chords", () => {
+  const ascending = getIntervalPlaybackPlan(
+    makePatternExercise("ascending-then-descending", 0, 0),
+  );
+  assert.deepEqual(
+    ascending.events.map((event) => ({
+      notes: event.pitches.map((pitch) => pitch.toneName),
+      durationSeconds: event.durationSeconds,
+    })),
+    [
+      { notes: ["C4"], durationSeconds: 0.42 },
+      { notes: ["E4"], durationSeconds: 0.5 },
+      { notes: ["C4"], durationSeconds: 0.5 },
+    ],
+  );
+  assert.deepEqual(ascending.options, {
+    startDelaySeconds: 0.03,
+    gapBetweenEventsSeconds: 0.17,
+    completionPaddingSeconds: 0.17,
+  });
+  assert.equal(
+    getMusicPlaybackDurationMs(ascending.events, ascending.options),
+    1960,
+  );
+
+  const directionalThenHarmonic = getIntervalPlaybackPlan(
+    makePatternExercise("directional-then-harmonic", 0.6, 0),
+  );
+  assert.deepEqual(
+    directionalThenHarmonic.events.map((event) =>
+      event.pitches.map((pitch) => pitch.toneName),
+    ),
+    [["E4"], ["C4"], ["C4", "E4"]],
+  );
+  assert.equal(
+    getMusicPlaybackDurationMs(
+      directionalThenHarmonic.events,
+      directionalThenHarmonic.options,
+    ),
+    2310,
+  );
+
+  const harmonic = getIntervalPlaybackPlan(
+    makePatternExercise("selected-presentation", 0.9, 0),
+  );
+  assert.deepEqual(
+    harmonic.events[0].pitches.map((pitch) => pitch.toneName),
+    ["C4", "E4"],
+  );
+  assert.equal(
+    getMusicPlaybackDurationMs(harmonic.events, harmonic.options),
+    1050,
   );
 });
