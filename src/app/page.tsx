@@ -3,8 +3,11 @@ import Link from "next/link";
 import {
   ArrowUpRight,
   AudioLines,
+  Dumbbell,
+  Hand,
   Layers3,
   Piano,
+  Repeat2,
 } from "lucide-react";
 
 import { LiquidCard } from "@/components/kokonutui/liquid-card";
@@ -12,7 +15,7 @@ import { LiquidCard } from "@/components/kokonutui/liquid-card";
 export const metadata: Metadata = {
   title: "Yuei · Music Training",
   description:
-    "Choose a focused Yuei.AI training module for intervals, note reading, or chords.",
+    "Choose a focused Yuei.AI training module for intervals, note reading, chords, clapbacks, playbacks, or piano technique.",
 };
 
 const MODULES = [
@@ -46,6 +49,37 @@ const MODULES = [
     status: "Coming soon",
     action: "Preview module",
     icon: Layers3,
+    accent: "bg-[var(--orange)]",
+  },
+  {
+    number: "04",
+    title: "Clapbacks",
+    description: "Practice rhythmic and musical clapback exercises.",
+    href: "/clapbacks",
+    status: "Coming soon",
+    action: "Choose a level",
+    icon: Hand,
+    accent: "bg-[var(--green)]",
+  },
+  {
+    number: "05",
+    title: "Playbacks",
+    description: "Practice playback exercises.",
+    href: "/playbacks",
+    status: "Coming soon",
+    action: "Choose a level",
+    icon: Repeat2,
+    accent: "bg-[var(--yellow)]",
+  },
+  {
+    number: "06",
+    title: "Technique Pool",
+    description:
+      "Build control, coordination, and consistency with focused piano technique exercises.",
+    href: "/technique",
+    status: "Coming soon",
+    action: "Preview module",
+    icon: Dumbbell,
     accent: "bg-[var(--orange)]",
   },
 ] as const;
@@ -89,7 +123,7 @@ export default function HomePage() {
           <div className="lg:col-span-8">
             <div className="technical-label mb-7 flex items-center gap-3">
               <span className="h-2.5 w-2.5 border border-black bg-[var(--green)]" />
-              Training index / Three modules
+              Training index / Six modules
             </div>
             <h1 className="max-w-4xl text-balance text-[clamp(3.7rem,8vw,7.7rem)] font-semibold leading-[0.82] tracking-[-0.075em]">
               Practice music.
