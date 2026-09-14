@@ -46,8 +46,8 @@ const MODULES = [
     description:
       "Train your ear to recognize chords and harmonic qualities.",
     href: "/chord-identification",
-    status: "Coming soon",
-    action: "Preview module",
+    status: "Ready",
+    action: "Start listening",
     icon: Layers3,
     accent: "bg-[var(--orange)]",
   },

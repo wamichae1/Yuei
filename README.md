@@ -40,9 +40,17 @@ Features include:
 
 ### Chord Identification
 
-A planned module for identifying musical chords by ear.
+Identify RCM chord qualities and chord tones by ear across Levels 1–10.
 
-**Status:** Coming soon
+Features include:
+
+* Level-specific triads and seventh chords
+* Root-position and permitted first-inversion voicings
+* Broken, blocked, and chord-tone playback patterns
+* Timed and unlimited sessions
+* Shared Salamander piano-sample playback
+
+**Status:** Ready
 
 ## Tech Stack
 
