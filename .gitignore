@@ -49,4 +49,5 @@ next-env.d.ts
 AGENTS.md
 verify.ts
 verify_slider.py
+verify_modules.py
 CLAUDE.md

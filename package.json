@@ -8,7 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "node --test --test-isolation=none src/features/training/session.test.ts src/features/interval-trainer/theory.test.ts src/features/chord-identification/theory.test.ts src/features/note-identification/noteGenerator.test.ts src/features/music/rangeSlider.test.ts src/features/music/pianoSamples.test.ts src/features/level-training/modules.test.ts",
+    "test": "node --test --test-isolation=none src/features/training/session.test.ts src/features/interval-trainer/theory.test.ts src/features/chord-identification/theory.test.ts src/features/note-identification/noteGenerator.test.ts src/features/music/rangeSlider.test.ts src/features/music/pianoSamples.test.ts src/features/level-training/modules.test.ts src/features/technique/technique.test.ts",
     "check": "npm run typecheck && npm run lint && npm run test"
   },
   "dependencies": {
